@@ -15,9 +15,9 @@ from . import wcocr  # 你的 wcocr 扩展模块
 log_dir = Path("logs")
 log_dir.mkdir(exist_ok=True)
 
-# token
 TOKEN = os.getenv("TOKEN", "mysecrettoken")
-FE_TOKEN = os.getenv("FE_TOKEN", "mysecrettoken")
+HOST = os.getenv("HOST", "127.0.0.1")
+PORT = int(os.getenv("PORT", "5001"))
 
 # 配置日志输出
 logger.remove()  # 移除默认的处理器
@@ -66,7 +66,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
             detail="Invalid authentication scheme",
         )
     # 简单固定值校验，可根据实际需要改成更复杂的验证逻辑
-    if credentials.credentials != TOKEN and credentials.credentials != FE_TOKEN:
+    if credentials.credentials != TOKEN:
         logger.warning("Invalid token provided")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -177,9 +177,9 @@ def main():
         logger.error("AVX2 is not supported on this system")
         sys.exit(1)
     
-    logger.info("Starting OCR service on 0.0.0.0:5001")
+    logger.info("Starting OCR service on {}:{}", HOST, PORT)
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5001)
+    uvicorn.run(app, host=HOST, port=PORT)
 
 
 if __name__ == "__main__":
